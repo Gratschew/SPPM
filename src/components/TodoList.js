@@ -19,32 +19,46 @@ const TodoList = () => {
       id: nanoid(),
       name: "Wake up",
       done: false,
+      points: 5,
     },
     {
       id: nanoid(),
       name: "Eat",
       done: false,
+      points: 5,
     },
     {
       id: nanoid(),
       name: "Sleep",
       done: false,
+      points: 5,
     },
   ]);
 
   const onInsertItem = (event) => {
     const { keyCode, target } = event;
     if (keyCode !== 13) return;
-    const input_string = target.value.trim();
+    const parts = target.value.split("|");
+    const input_string = parts[0].trim();
+    const input_points = parts[1].trim();
+
     if ("" === input_string) {
       target.value = "";
       alert("Blank Input Error");
       return;
     }
+
+    if(isNaN(input_points)){
+
+      alert("Given point value is not a number");
+      return;
+    }
+    
     const new_item = {
       id: nanoid(),
       name: input_string,
       done: false,
+      points: input_points,
     };
 
     setListItems([new_item, ...listItems]);
@@ -61,7 +75,9 @@ const TodoList = () => {
 
   const onDeleteItem = (id) => {
     const new_items = listItems.filter((item) => {
-      if (id !== item.id) return item;
+      if (id !== item.id){
+        return item;
+      }
     });
     setListItems(new_items);
   };
@@ -86,6 +102,11 @@ const TodoList = () => {
     return current.done ? prev + 1 : prev;
   }, 0);
 
+  const daily_goal = 30;
+  const current_points = Number(listItems.reduce((prev, current) => {
+    return current.done ? Number(Number(prev) + Number(current.points)) : Number(prev);
+  }, 0));
+
   return (
     <div className="todolist">
       <Card style={{ width: "600px", color: "#000" }} className="mb-3 mx-auto">
@@ -98,6 +119,9 @@ const TodoList = () => {
           </Card.Title>
           <Card.Subtitle className="mb-2 text-muted">
             {"What would you like to get done?"}
+          </Card.Subtitle>
+          <Card.Subtitle>
+            Todays Points: {current_points}/{daily_goal}
           </Card.Subtitle>
           <InputGroup className="mb-3">
             <FormControl
@@ -116,6 +140,7 @@ const TodoList = () => {
                   id={item.id}
                   name={item.name}
                   done={item.done}
+                  points={item.points}
                   onUpdateItem={onUpdateItem}
                   onDeleteItem={onDeleteItem}
                 />
